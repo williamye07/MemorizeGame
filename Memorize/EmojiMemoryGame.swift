@@ -7,21 +7,29 @@
 
 import SwiftUI
 
-func createCardContent(pairIndex: Int) -> String {
-    return "😀"
-}
-
-class EmojiMemoryGame {
-    private var model: MemoryGame<String> = EmojiMemoryGame.createMemoryGame()
+class EmojiMemoryGame: ObservableObject {
     
-    static func createMemoryGame() -> MemoryGame<String> {
-        let emojis = ["👻", "🎃", "😎", "😱", "🍆"]
-        let numCards = Int.random(in: 2...4)
+    var gameTheme : Theme
+    
+    @Published private var model: MemoryGame<String>
+    
+    init(){
+        let gameTheme = Themes[Int.random(in: 0..<Themes.count)]
+        self.gameTheme = gameTheme
+        model = EmojiMemoryGame.createMemoryGame(gameTheme)
+    }
+    
+    static func createMemoryGame(_ gameTheme: Theme) -> MemoryGame<String> {
+        let emojis = gameTheme.emojiSet
+        let numCards = gameTheme.numCardsShown ?? Int.random(in: 2..<emojis.count)
         return MemoryGame<String>(numberOfPairsOfCards: numCards) { pairIndex in
             return emojis[pairIndex]
         }
     }
-        
+    
+    var score: Int {
+        model.score
+    }
     
     var cards: Array<MemoryGame<String>.Card>{
         model.cards
@@ -29,5 +37,10 @@ class EmojiMemoryGame {
     
     func choose(card: MemoryGame<String>.Card){
         model.choose(card: card)
+    }
+    
+    func resetGame() {
+        gameTheme = Themes[Int.random(in: 0..<Themes.count)]
+        model = EmojiMemoryGame.createMemoryGame(gameTheme)
     }
 }
