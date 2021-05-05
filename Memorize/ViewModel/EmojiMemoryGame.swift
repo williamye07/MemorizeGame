@@ -11,17 +11,23 @@ class EmojiMemoryGame: ObservableObject {
     
     var gameTheme : Theme
     
+    var gameThemeJson : Data?
+    
     @Published private var model: MemoryGame<String>
     
-    init(){
-        let gameTheme = Themes[Int.random(in: 0..<Themes.count)]
+    init(_ theme: Theme){
+        let gameTheme = theme
         self.gameTheme = gameTheme
         model = EmojiMemoryGame.createMemoryGame(gameTheme)
+        gameThemeJson = try? JSONEncoder().encode(gameTheme)
+        if gameThemeJson != nil{
+            print("Selected gameTheme: \(gameThemeJson!.utf8!)")
+        }
     }
     
-    static func createMemoryGame(_ gameTheme: Theme) -> MemoryGame<String> {
+    private static func createMemoryGame(_ gameTheme: Theme) -> MemoryGame<String> {
         let emojis = gameTheme.emojiSet
-        let numCards = gameTheme.numCardsShown ?? Int.random(in: 2..<emojis.count)
+        let numCards = gameTheme.numCardsShown
         return MemoryGame<String>(numberOfPairsOfCards: numCards) { pairIndex in
             return emojis[pairIndex]
         }
@@ -40,7 +46,11 @@ class EmojiMemoryGame: ObservableObject {
     }
     
     func resetGame() {
-        gameTheme = Themes[Int.random(in: 0..<Themes.count)]
+        gameThemeJson = try? JSONEncoder().encode(gameTheme)
+        if gameThemeJson != nil{
+            print("Selected gameTheme: \(gameThemeJson!.utf8!)")
+        }
+
         model = EmojiMemoryGame.createMemoryGame(gameTheme)
     }
 }
